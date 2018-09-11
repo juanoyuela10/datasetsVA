@@ -1,0 +1,244 @@
+// URL: https://beta.observablehq.com/@juanoyuela10/tarea-2
+// Title: TAREA 2 - Heridos en accidentes de transito - Bogotá
+// Author: Juan Carlos Oyuela (@juanoyuela10)
+// Version: 347
+// Runtime version: 1
+
+const m0 = {
+  id: "62c8f4908b1effe3@347",
+  variables: [
+    {
+      inputs: ["md"],
+      value: (function(md){return(
+md`# TAREA 2 - Heridos en accidentes de transito - Bogotá
+Presentado por: Juan Carlos Oyuela Matiz
+
+Código: 201711608
+
+Curso: Visual Analytics ISIS-4822`
+)})
+    },
+    {
+      inputs: ["md"],
+      value: (function(md){return(
+md`# Guía
+Esta visualización presenta el volumen de personas que se reportan heridas, como producto de eventualizades en accidentes de tránsito en un periodo de un año, específicamente el 2016, distribuidas por cada localidad. 
+
+Al pasar el mouse por cada una de las barras se visualiza el detalle por localidad. 
+
+El conjunto de datos fué obtenido de https://www.datos.gov.co, proveido por la Secretaría de Movilidad de Bogotá.
+
+https://www.datos.gov.co/Transporte/2016-ACCIDENTES-DE-TR-NSITO-BOGOT-/79fi-zm8c
+`
+
+)})
+    },
+    {
+      inputs: ["md"],
+      value: (function(md){return(
+md`# VOLUMEN DE HERIDOS POR LOCALIDAD - BOGOTÁ - 2016`
+)})
+    },
+    {
+      name: "svg",
+      inputs: ["DOM","width","height"],
+      value: (function(DOM,width,height){return(
+DOM.svg(width, height)
+)})
+    },
+    {
+      name: "doBarChart",
+      inputs: ["width","d3"],
+      value: (function(width,d3){return(
+(localidadTotalHeridos, svg) => {  
+  
+  let tooltip ;
+  const height = 700,
+        margin = {left:0, right:10, top: 10, bottom:120},
+        iwidth = width/2 - margin.left -margin.right,
+        iheight = height - margin.top - margin.bottom;
+
+  const dataSorted = localidadTotalHeridos.sort( (a,b) => d3.descending(a.value, b.value)) ;
+  const x = d3.scaleLinear()
+    .domain([0, d3.max(localidadTotalHeridos, d=> d.value)])
+    .range([0, width]);
+  const y = d3.scaleBand()
+    .domain(dataSorted.map( d=> d.key))
+    .range([0, dataSorted.length*10]);  
+  
+  const rects = svg.selectAll(".bar")
+    .data(dataSorted)
+    .on("mouseover", function(d) {
+           console.log(d);
+           tooltip.attr("x", 400)
+          .attr("y", height-300)
+          .text(`Heridos=${d.value} Localidad=${d.key}`);
+          d3.select(this)
+          .style("fill","Red") 
+        })
+    .on("mouseout", function(d) {
+           console.log(d);
+          d3.select(this)
+          .style("fill","LightSteelBlue") 
+        });
+  
+  rects.enter()
+    .append("rect")
+      .attr("class", "bar")
+      .attr("x", 0)
+      .attr("y", (d) => y(d.key)*3)
+      .attr("width", d => x(d.value))
+      .attr("height", 20)
+      .style("fill", "LightSteelBlue")
+      //.style("stroke", "Navy");
+      
+ const texts = svg.selectAll(".label")
+    .data(dataSorted);
+  
+  rects.enter()
+      .append("text")
+      .attr("class", "label")
+      .attr("x", 30)
+      .attr("y", (d) => (y(d.key)*3)+15)
+      .text( d=> d.key)
+      .style("fill", "#333")
+      .style("font-size", "8pt")
+      .style("font-weight", "bold")
+      .style("font-family", "sans-serif"); 
+  
+  //rects.enter()
+//      .append("text")
+//      .attr("class", "label")
+      //.attr("x", (d) => (d.key.length)+150)
+//      .attr("x", (d) => x(d.value)-20)
+//      .attr("y", (d) => (y(d.key)*3)+15)
+//      .text( d=> d.value)
+//      .style("fill", "Black")
+//      .style("font-size", "10pt")
+      //.style("font-weight", "bold")
+//      .style("font-family", "sans-serif"); 
+     
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`)
+  
+  g.append("g")
+    .call(d3.axisBottom(x))
+    .attr("transform", `translate(0,${iheight})`);
+  
+  tooltip = g.append("text")
+    .style("font-size", "16pt")
+    .style("font-family", "sans-serif")  
+    .style("color", "#333")
+    .style("font-weight", "bold")
+    .attr("x", -100);
+  
+  return svg.node();
+}
+)})
+    },
+    {
+      name: "doBarChart2",
+      inputs: ["width","d3"],
+      value: (function(width,d3){return(
+(localidadTotalFatalidades, svg) => {  
+  
+  const height = 700,
+        margin = {left:0, right:10, top: 10, bottom:120},
+        iwidth = width/2 - margin.left -margin.right,
+        iheight = height - margin.top - margin.bottom;
+
+  const dataSorted = localidadTotalFatalidades.sort( (a,b) => d3.descending(a.value, b.value)) ;
+  const x = d3.scaleLinear()
+    .domain([0, d3.max(localidadTotalFatalidades, d=> d.value)])
+    .range([0, width]);
+  const y = d3.scaleBand()
+    .domain(dataSorted.map( d=> d.key))
+    .range([0, dataSorted.length*10]);  
+  
+  const rects = svg.selectAll(".bar")
+    .data(dataSorted);
+  
+  rects.enter()
+    .append("rect")
+      .attr("class", "bar")
+      .attr("x", 0)
+      .attr("y", (d) => (y(d.key)*3)+5)
+      .attr("width", d => x(d.value))
+      .attr("height", 5)
+      .style("fill", "Red")
+      //.style("stroke", "Navy");
+      
+   
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`)
+  
+  return svg.node();
+}
+)})
+    },
+    {
+      name: "d3",
+      inputs: ["require"],
+      value: (function(require){return(
+require("d3")
+)})
+    },
+    {
+      name: "data",
+      inputs: ["d3"],
+      value: (function(d3){return(
+d3.json("https://www.datos.gov.co/resource/rxv3-h9d8.json")
+)})
+    },
+    {
+      name: "localidadTotalHeridos",
+      inputs: ["d3","data"],
+      value: (function(d3,data){return(
+d3.nest()
+  .key(function(d) { return d.localidad;})
+  .rollup(function(d) { 
+   return d3.sum(d, function(g) {return g.totalheridos; });
+  }).entries(data)
+)})
+    },
+    {
+      name: "localidadTotalFatalidades",
+      inputs: ["d3","data"],
+      value: (function(d3,data){return(
+d3.nest()
+  .key(function(d) { return d.localidad;})
+  .rollup(function(d) { 
+   return d3.sum(d, function(g) {return g.totalmuertos; });
+  }).entries(data)
+)})
+    },
+    {
+      name: "height",
+      value: (function(){return(
+700
+)})
+    },
+    {
+      name: "margin",
+      value: (function(){return(
+{top: 40, right: 0, bottom: 90, left: 60 }
+)})
+    },
+    {
+      inputs: ["doBarChart","localidadTotalHeridos","d3","svg"],
+      value: (function(doBarChart,localidadTotalHeridos,d3,svg){return(
+doBarChart(localidadTotalHeridos, d3.select(svg))
+)})
+    },
+    {
+
+    }
+  ]
+};
+
+const notebook = {
+  id: "62c8f4908b1effe3@347",
+  modules: [m0]
+};
+
+export default notebook;
