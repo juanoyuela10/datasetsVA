@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<hr color="#EFEFEB" />
+<head>
+	  <b><font size="4"><span style="font-family: 'Arial Narrow'; font-weight: bold; font-style: normal; text-decoration: none; font-size: 24pt;color: #004080">COLOMBIA... ¿Cómo nos fué en las pruebas?</span></font></b>
+	  <hr color="#FFFFFF" />
+	  <b><font size="4"><span style="font-family: 'Arial Narrow'; font-weight: bold; font-style: normal; text-decoration: none; font-size: 18pt;color: #004080">Saber 11 (2018-I)</span></font></b>
+</head>
+<hr color="#EFEFEB" />
+<svg width="1200" height="500"></svg>
+<style>
+	.bar {
+		fill: SkyBlue;
+	}
+	.bar:hover {
+		fill: SlateBlue;
+	}
+	.maximos {
+		fill: LimeGreen;
+	}
+	.minimos {
+		fill: Red;
+	}
+</style>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script>
+
+let tooltip;
+let tooltip2;
+let tooltip3;
+
+var svg = d3.select("svg"),
+margin = {
+	top: 20,
+	right: 200,
+	bottom: 90,
+	left: 50
+},
+width = +svg.attr("width") - margin.left - margin.right,
+height = +svg.attr("height") - margin.top - margin.bottom,
+g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var x = d3.scaleBand()
+	.rangeRound([0, width])
+	.padding(0.1);
+
+var y = d3.scaleLinear()
+	.rangeRound([height, 0]);
+
+var datos = d3.tsv("https://raw.githubusercontent.com/juanoyuela10/datasetsVA/master/promedioDepto.tsv").then(function (data) {
+	x.domain(data.map(function (d) {
+			return d.Departamento;
+		}));
+	y.domain([0, d3.max(data, function (d) {
+				return Number(d.PMaximo);
+			})]);
+
+	g.append("g")
+	.attr("transform", "translate(0," + height + ")")
+	.call(d3.axisBottom(x))
+	.selectAll("text")
+    .attr("y", 10)
+    .attr("x", 4)
+    .attr("dy", ".35em")
+    .attr("transform", "rotate(45)")
+    .style("text-anchor", "start");
+
+	g.append("g")
+	.call(d3.axisLeft(y))
+	.append("text")
+	.attr("fill", "#000")
+	.attr("transform", "rotate(-90)")
+	.attr("y", 2)
+	.attr("dy", "0.71em")
+	.attr("text-anchor", "end")
+	.text("Puntaje global promedio");
+	
+	//Ubicar los promedios del puntaje por cada departamento
+	g.selectAll(".bar")
+	.data(data)
+	.enter().append("rect")
+	.attr("class", "bar")
+	.attr("x", function (d) {
+		return x(d.Departamento)
+	})
+	.attr("y", function (d) {
+		return y(Number(d.PromedioPuntaje));
+	})
+	.attr("width", x.bandwidth())
+	.attr("height", function (d) {
+		return height - y(Number(d.PromedioPuntaje));
+	})
+	.on("mouseover", function(d) {
+           console.log(d);
+           tooltip.attr("x", width)
+          .attr("y", height-30)
+          .text(`Puntaje promedio=${d.PromedioPuntaje}`);
+          d3.select(this)
+		  tooltip2.attr("x", width)
+          .attr("y", height-10)
+          .text(`Puntaje mínimo=${d.PMinimo}`);
+          d3.select(this)
+		  tooltip3.attr("x", width)
+          .attr("y", height-50)
+          .text(`Puntaje máximo=${d.PMaximo}`);
+          d3.select(this)
+     });
+	//Ubicar el máximo puntaje de las pruebas en el departamento
+	g.selectAll(".maximos")
+	.data(data)
+	.enter().append("circle")
+	.attr("class", "maximos")
+	.attr("cx", function (d) {
+		return (x(d.Departamento)+13)
+	})
+	.attr("cy", function (d) {
+		return y(Number(d.PMaximo));
+	})
+	.attr("r","4px");
+	//Ubicar el mínimo puntaje de las pruebas en el departamento
+	g.selectAll(".minimos")
+	.data(data)
+	.enter().append("circle")
+	.attr("class", "minimos")
+	.attr("stroke","white") 
+	.attr("stroke-width","2")
+	.attr("cx", function (d) {
+		return (x(d.Departamento)+13)
+	})
+	.attr("cy", function (d) {
+		return y(Number(d.PMinimo));
+	})
+	.attr("r","4px");
+	//Etiqueta para los promedios
+	tooltip = g.append("text")
+    .style("font-size", "10pt")
+    .style("font-family", "arial")  
+    .style("fill", "SlateBlue")
+    .style("font-weight", "bold");
+	//Etiqueta para los mínimos
+	tooltip2 = g.append("text")
+    .style("font-size", "10pt")
+    .style("font-family", "arial")  
+    .style("fill", "Red")
+    .style("font-weight", "bold");
+	//Etiqueta para los máximos
+	tooltip3 = g.append("text")
+    .style("font-size", "10pt")
+    .style("font-family", "arial")  
+    .style("fill", "LimeGreen")
+    .style("font-weight", "bold");
+});
+
+</script>
+<hr color="#EFEFEB" />
